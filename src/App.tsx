@@ -13,6 +13,8 @@ import {
   Briefcase,
   Layers,
   Award,
+  GraduationCap,
+  BookOpen,
   CheckCircle,
   Activity,
   ChevronRight,
@@ -478,8 +480,9 @@ export default function App() {
               <motion.a
                 whileHover={{ scale: 1.03, y: -1 }}
                 whileTap={{ scale: 0.97 }}
-                href="/Ahmed_Mousa_SAP_HCM_CV.pdf"
-                download="Ahmed_Mousa_SAP_HCM_CV.pdf"
+                href="https://drive.google.com/file/d/1QkkPUB9K6fQhrCpCc-JyDysLY6UxnC-W/view"
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => logAction("download_resume")}
                 className="px-5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm"
               >
@@ -681,7 +684,7 @@ export default function App() {
             </div>
           </motion.section>
 
-          {/* SECTION: Certifications & Structured Training */}
+          {/* SECTION: Education, Certifications & Structured Training */}
           <motion.section 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -692,36 +695,78 @@ export default function App() {
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-850">
               <Award className={`w-5 h-5 ${getAccentTextClass()}`} />
               <div>
-                <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">{t("الشهادات والبرامج التدريبية", "Certifications & Training")}</h2>
-                <p className="text-[11px] text-slate-400">{t("الشهادات المعتمدة والبرامج التأهيلية والدورات التخصصية", "Official program certifications, accredited training, and professional development")}</p>
+                <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">{t("التعليم والشهادات والتدريب", "Education, Certifications & Training")}</h2>
+                <p className="text-[11px] text-slate-400">{t("المؤهلات الأكاديمية والبرامج التأهيلية والدورات التخصصية المعتمدة", "Academic credentials, official program certifications, and professional training history")}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {dbState.trainings.map((train) => (
-                <div
-                  key={train.id}
-                  className={`p-5 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 shadow-sm flex flex-col justify-between ${getBorderRadiusClass()}`}
-                >
-                  <div>
-                    <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-150 dark:border-slate-800">
-                      {t(train.periodAr, train.periodEn)}
-                    </span>
-                    <h3 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 mt-2">
-                      {t(train.titleAr, train.titleEn)}
-                    </h3>
-                    <p className={`text-[11px] font-semibold mt-0.5 ${getAccentTextClass()}`}>
-                      {t(train.providerAr, train.providerEn)}
-                    </p>
-                    
-                    <ul className="mt-3 space-y-1.5 list-disc list-inside text-[11px] text-slate-600 dark:text-slate-400">
-                      {t(train.bulletsAr, train.bulletsEn).map((b: string, bIdx: number) => (
-                        <li key={bIdx} className="leading-relaxed pl-0.5">{b}</li>
-                      ))}
-                    </ul>
-                  </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Education Column */}
+              <div className="lg:col-span-1 space-y-4">
+                <div className="flex items-center gap-2 pb-1 border-b border-slate-100 dark:border-slate-800/60">
+                  <GraduationCap className={`w-4 h-4 ${getAccentTextClass()}`} />
+                  <h3 className="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider">
+                    {t("التعليم الأكاديمي", "Academic Education")}
+                  </h3>
                 </div>
-              ))}
+                {dbState.education.map((edu) => (
+                  <div
+                    key={edu.id}
+                    className={`p-5 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 shadow-sm flex flex-col justify-between ${getBorderRadiusClass()}`}
+                  >
+                    <div>
+                      <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-150 dark:border-slate-800">
+                        {t(edu.periodAr, edu.periodEn)}
+                      </span>
+                      <h3 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 mt-2">
+                        {t(edu.degreeAr, edu.degreeEn)}
+                      </h3>
+                      <p className="text-[11px] font-semibold mt-1 text-slate-500">
+                        {t("جامعة بنها - بكالوريوس في علوم الحاسب", "Bachelor of Computer Science")}
+                      </p>
+                      <p className={`text-[11px] font-bold mt-2 ${getAccentTextClass()}`}>
+                        {t(edu.gradeAr, edu.gradeEn)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Certifications & Trainings Column */}
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex items-center gap-2 pb-1 border-b border-slate-100 dark:border-slate-800/60">
+                  <BookOpen className={`w-4 h-4 ${getAccentTextClass()}`} />
+                  <h3 className="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider">
+                    {t("الشهادات والبرامج التدريبية", "Certifications & Training")}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {dbState.trainings.map((train) => (
+                    <div
+                      key={train.id}
+                      className={`p-5 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 shadow-sm flex flex-col justify-between ${getBorderRadiusClass()}`}
+                    >
+                      <div>
+                        <span className="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-150 dark:border-slate-800">
+                          {t(train.periodAr, train.periodEn)}
+                        </span>
+                        <h3 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 mt-2">
+                          {t(train.titleAr, train.titleEn)}
+                        </h3>
+                        <p className={`text-[11px] font-semibold mt-0.5 ${getAccentTextClass()}`}>
+                          {t(train.providerAr, train.providerEn)}
+                        </p>
+                        
+                        <ul className="mt-3 space-y-1.5 list-disc list-inside text-[11px] text-slate-600 dark:text-slate-400">
+                          {t(train.bulletsAr, train.bulletsEn).map((b: string, bIdx: number) => (
+                            <li key={bIdx} className="leading-relaxed pl-0.5">{b}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </motion.section>
 
