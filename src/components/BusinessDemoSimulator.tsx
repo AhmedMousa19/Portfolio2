@@ -38,22 +38,16 @@ type SimulationStep = {
 };
 
 export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSimulatorProps) {
-  const [activeTab, setActiveTab] = useState<"leave" | "sap">("leave");
   const [simulationRunning, setSimulationRunning] = useState(false);
   const [currentStepIdx, setCurrentStepIdx] = useState(-1);
   const [simLog, setSimLog] = useState<string[]>([]);
   
-  // Tab 1 (Leave Request) inputs
+  // Leave Request inputs
   const [employeeName, setEmployeeName] = useState("Ahmed Mousa");
   const [leaveType, setLeaveType] = useState<"Annual" | "Sick" | "Emergency">("Annual");
   const [leaveDays, setLeaveDays] = useState(5);
   const [managerAction, setManagerAction] = useState<"approve" | "reject">("approve");
   const [leaveBalance, setLeaveBalance] = useState(21);
-
-  // Tab 2 (SAP Payroll & PCR) inputs
-  const [empGrade, setEmpGrade] = useState<"Standard" | "Senior">("Standard");
-  const [weekendOvertimeHours, setWeekendOvertimeHours] = useState(6);
-  const [baseSalary, setBaseSalary] = useState(1200);
 
   const t = <T,>(ar: T, en: T): T => (lang === "ar" ? ar : en);
 
@@ -98,13 +92,6 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
       default: return "border-rose-500/20";
     }
   };
-
-  // Reset simulation state when changing tabs
-  useEffect(() => {
-    setSimulationRunning(false);
-    setCurrentStepIdx(-1);
-    setSimLog([]);
-  }, [activeTab]);
 
   // Define Steps for Leave Management
   const leaveSteps: SimulationStep[] = [
@@ -155,64 +142,15 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
     }
   ];
 
-  // Define Steps for SAP Payroll PCR Rules
-  const sapSteps: SimulationStep[] = [
-    {
-      id: 1,
-      labelAr: "تحميل بيانات الوقت والبطاقة",
-      labelEn: "Load Time Data into Table TIP",
-      descAr: `قراءة الحضور اليومي للموظف (${t(empGrade === "Standard" ? "درجة معيارية" : "درجة عليا", empGrade)}). مسجل ${weekendOvertimeHours} ساعات عمل يوم العطلة (الجمعة).`,
-      descEn: `Reading clock-in events for ${empGrade} employee. Weekend (Friday) work recorded: ${weekendOvertimeHours} hours.`,
-      status: "idle",
-      icon: <Clock className="w-4 h-4" />
-    },
-    {
-      id: 2,
-      labelAr: "تطبيق قاعدة التقييم الفنية (Time Evaluation)",
-      labelEn: "Apply Time Rule PCR (ZW01)",
-      descAr: "التحقق عبر Schema مخصصة لمعرفة هل الموظف يستحق علاوة عمل عطلة أم لا.",
-      descEn: "Routing through configuration schema TM00 & PCR ZW01 to evaluate weekend work overtime qualification.",
-      status: "idle",
-      icon: <Settings className="w-4 h-4 text-amber-500" />
-    },
-    {
-      id: 3,
-      labelAr: "تحديد معامل الضرب (Multiplier Rule)",
-      labelEn: "Determine Overtime Multiplier",
-      descAr: `قاعدة احتساب العمل الإضافي لعطلة نهاية الأسبوع تمنح الموظف نسبة 150% (1.5x) لعدد الساعات المذكورة (${weekendOvertimeHours} ساعات).`,
-      descEn: `PCR splits premium hours: Weekend multiplier is set at 150% (1.5x) for the registered ${weekendOvertimeHours} hours.`,
-      status: "idle",
-      icon: <TrendingUp className="w-4 h-4 text-blue-500" />
-    },
-    {
-      id: 4,
-      labelAr: "تصدير الأجور الإضافية لكشف الرواتب (GWT)",
-      labelEn: "Generate Wage Types (GWT Table)",
-      descAr: `توليد رمز الأجر الإضافي للموظف (Wage Type: WT4010) وتمريره بسلاسة لكشف الرواتب الشهري لحساب الاستحقاق الإضافي.`,
-      descEn: `Generating Wage Type 4010 (Weekend OT Premium) and dispatching basic split parameters into the active Payroll schema.`,
-      status: "idle",
-      icon: <Database className="w-4 h-4 text-indigo-500" />
-    },
-    {
-      id: 5,
-      labelAr: "احتساب صافي الراتب النهائي",
-      labelEn: "Calculate Net Salary Log",
-      descAr: `الراتب الأساسي ($${baseSalary}) + الإضافي المعتمد ($${((baseSalary / 160) * weekendOvertimeHours * 1.5).toFixed(1)}) = الصافي المالي الإجمالي ($${(baseSalary + (baseSalary / 160) * weekendOvertimeHours * 1.5).toFixed(1)}).`,
-      descEn: `Base salary ($${baseSalary}) + Overtime compensation ($${((baseSalary / 160) * weekendOvertimeHours * 1.5).toFixed(1)}) = Total Gross Calculated: $${(baseSalary + (baseSalary / 160) * weekendOvertimeHours * 1.5).toFixed(1)}.`,
-      status: "idle",
-      icon: <CheckCircle className="w-4 h-4 text-emerald-500" />
-    }
-  ];
-
-  // Select steps based on active tab
-  const activeSteps = activeTab === "leave" ? leaveSteps : sapSteps;
+  // Select steps (always leaveSteps now)
+  const activeSteps = leaveSteps;
 
   // Run simulation timeline using timed intervals
   const handleStartSimulation = () => {
     if (simulationRunning) return;
     
     // Safety check for leave days
-    if (activeTab === "leave" && leaveDays > leaveBalance) {
+    if (leaveDays > leaveBalance) {
       setSimLog([
         t(
           `❌ خطأ فني: رصيد الإجازات المتبقي (${leaveBalance} أيام) أقل من عدد الأيام المطلوبة (${leaveDays} أيام)!`,
@@ -278,32 +216,8 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
             {t("محاكي سيناريوهات الأعمال الحقيقية", "Interactive Real-World Business Simulator")}
           </h2>
           <p className="text-[11px] text-slate-400">
-            {t("تفاعل مع الأنظمة البرمجية وسير العمل التي قمت ببنائها وتخصيصها باستخدام سيناريوهات ملموسة", "Interact with core enterprise architectures, customized SAP schemas, and automated workflows built with real cases")}
+            {t("تفاعل مع الأنظمة البرمجية وسير العمل التي قمت ببنائها وتخصيصها باستخدام سيناريوهات ملموسة", "Interact with core enterprise architectures and automated workflows built with real cases")}
           </p>
-        </div>
-
-        {/* Tab Selection Switcher */}
-        <div className="flex flex-wrap gap-1.5 p-1 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200/50 dark:border-slate-800/50 max-w-max">
-          <button
-            onClick={() => setActiveTab("leave")}
-            className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-              activeTab === "leave"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm border border-slate-150 dark:border-slate-800"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-            }`}
-          >
-            {t("أتمتة الإجازات", "Leave Automation")}
-          </button>
-          <button
-            onClick={() => setActiveTab("sap")}
-            className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-              activeTab === "sap"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm border border-slate-150 dark:border-slate-800"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-            }`}
-          >
-            {t("احتساب الرواتب SAP", "SAP HCM Payroll")}
-          </button>
         </div>
       </div>
 
@@ -314,187 +228,109 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
           <div className="p-4 bg-slate-50/50 dark:bg-slate-950/25 border border-slate-150/80 dark:border-slate-850 rounded-xl space-y-4">
             <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" />
-              {activeTab === "leave" 
-                ? t("إعداد متغيرات طلب الإجازة", "Configure Leave Request")
-                : t("إعداد مدخلات احتساب الرواتب", "Configure Payroll Parameters")
-              }
+              {t("إعداد متغيرات طلب الإجازة", "Configure Leave Request")}
             </h3>
 
-            {/* TAB 1: LEAVE AUTOMATION CONTROLS */}
-            {activeTab === "leave" && (
-              <div className="space-y-3.5 text-xs">
-                {/* Employee Name Input */}
+            {/* LEAVE AUTOMATION CONTROLS */}
+            <div className="space-y-3.5 text-xs">
+              {/* Employee Name Input */}
+              <div className="space-y-1">
+                <label className="text-slate-600 dark:text-slate-400 font-bold">
+                  {t("اسم الموظف المعني", "Employee Name")}
+                </label>
+                <input
+                  type="text"
+                  value={employeeName}
+                  onChange={(e) => setEmployeeName(e.target.value)}
+                  disabled={simulationRunning}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
+                />
+              </div>
+
+              {/* Leave Type Select */}
+              <div className="space-y-1">
+                <label className="text-slate-600 dark:text-slate-400 font-bold">
+                  {t("نوع الإجازة المطلوبة", "Leave Type")}
+                </label>
+                <select
+                  value={leaveType}
+                  onChange={(e) => setLeaveType(e.target.value as any)}
+                  disabled={simulationRunning}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
+                >
+                  <option value="Annual">{t("إجازة سنوية اعتيادية (Annual)", "Annual Paid Leave")}</option>
+                  <option value="Sick">{t("إجازة مرضية معتمدة (Sick)", "Sick Leave")}</option>
+                  <option value="Emergency">{t("إجازة طارئة (Emergency)", "Emergency Leave")}</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {/* Leave Days Input */}
                 <div className="space-y-1">
                   <label className="text-slate-600 dark:text-slate-400 font-bold">
-                    {t("اسم الموظف المعني", "Employee Name")}
+                    {t("مدة الإجازة (يوم)", "Leave Duration")}
                   </label>
                   <input
-                    type="text"
-                    value={employeeName}
-                    onChange={(e) => setEmployeeName(e.target.value)}
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={leaveDays}
+                    onChange={(e) => setLeaveDays(Number(e.target.value))}
                     disabled={simulationRunning}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
                   />
                 </div>
 
-                {/* Leave Type Select */}
+                {/* Leave Balance Input */}
                 <div className="space-y-1">
                   <label className="text-slate-600 dark:text-slate-400 font-bold">
-                    {t("نوع الإجازة المطلوبة", "Leave Type")}
+                    {t("رصيد الإجازات الحالي", "Current Balance")}
                   </label>
-                  <select
-                    value={leaveType}
-                    onChange={(e) => setLeaveType(e.target.value as any)}
+                  <input
+                    type="number"
+                    min={1}
+                    max={45}
+                    value={leaveBalance}
+                    onChange={(e) => setLeaveBalance(Number(e.target.value))}
                     disabled={simulationRunning}
                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                  >
-                    <option value="Annual">{t("إجازة سنوية اعتيادية (Annual)", "Annual Paid Leave")}</option>
-                    <option value="Sick">{t("إجازة مرضية معتمدة (Sick)", "Sick Leave")}</option>
-                    <option value="Emergency">{t("إجازة طارئة (Emergency)", "Emergency Leave")}</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Leave Days Input */}
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-slate-400 font-bold">
-                      {t("مدة الإجازة (يوم)", "Leave Duration")}
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={30}
-                      value={leaveDays}
-                      onChange={(e) => setLeaveDays(Number(e.target.value))}
-                      disabled={simulationRunning}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                    />
-                  </div>
-
-                  {/* Leave Balance Input */}
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-slate-400 font-bold">
-                      {t("رصيد الإجازات الحالي", "Current Balance")}
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={45}
-                      value={leaveBalance}
-                      onChange={(e) => setLeaveBalance(Number(e.target.value))}
-                      disabled={simulationRunning}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                    />
-                  </div>
-                </div>
-
-                {/* Simulated Manager Action */}
-                <div className="space-y-1.5">
-                  <label className="text-slate-600 dark:text-slate-400 font-bold block mb-1">
-                    {t("قرار المدير المحاكي", "Simulated Manager Action")}
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      disabled={simulationRunning}
-                      onClick={() => setManagerAction("approve")}
-                      className={`py-2 rounded-lg font-extrabold text-[11px] border transition-all cursor-pointer ${
-                        managerAction === "approve"
-                          ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
-                          : "bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-600 border-slate-200 dark:border-slate-800"
-                      }`}
-                    >
-                      {t("الموافقة على الإجازة", "APPROVE REQUEST")}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={simulationRunning}
-                      onClick={() => setManagerAction("reject")}
-                      className={`py-2 rounded-lg font-extrabold text-[11px] border transition-all cursor-pointer ${
-                        managerAction === "reject"
-                          ? "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-500/30"
-                          : "bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-600 border-slate-200 dark:border-slate-800"
-                      }`}
-                    >
-                      {t("رفض الطلب", "REJECT REQUEST")}
-                    </button>
-                  </div>
+                  />
                 </div>
               </div>
-            )}
 
-            {/* TAB 2: SAP PAYROLL CONTROLS */}
-            {activeTab === "sap" && (
-              <div className="space-y-3.5 text-xs">
-                {/* Employee Grade/Type */}
-                <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-slate-400 font-bold">
-                    {t("المستوى الوظيفي (تأثير PCR)", "Employee Tiers")}
-                  </label>
-                  <select
-                    value={empGrade}
-                    onChange={(e) => setEmpGrade(e.target.value as any)}
+              {/* Simulated Manager Action */}
+              <div className="space-y-1.5">
+                <label className="text-slate-600 dark:text-slate-400 font-bold block mb-1">
+                  {t("قرار المدير المحاكي", "Simulated Manager Action")}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
                     disabled={simulationRunning}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
+                    onClick={() => setManagerAction("approve")}
+                    className={`py-2 rounded-lg font-extrabold text-[11px] border transition-all cursor-pointer ${
+                      managerAction === "approve"
+                        ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                        : "bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-600 border-slate-200 dark:border-slate-800"
+                    }`}
                   >
-                    <option value="Standard">{t("درجة الموظفين المعيارية (علاوة 1.5x)", "Standard Staff (Gets 1.5x Premium)")}</option>
-                    <option value="Senior">{t("درجة الإدارة العليا (لا توجد علاوة وقت)", "Executive Management (Executive Limit: 0x)")}</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Weekend Worked Hours */}
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-slate-400 font-bold">
-                      {t("ساعات العمل الإضافي (العطلة)", "Weekend Hours Worked")}
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={16}
-                      value={weekendOvertimeHours}
-                      onChange={(e) => setWeekendOvertimeHours(Number(e.target.value))}
-                      disabled={simulationRunning}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                    />
-                  </div>
-
-                  {/* Basic Salary */}
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-slate-400 font-bold">
-                      {t("الراتب الشهري الأساسي ($)", "Basic Monthly Salary ($)")}
-                    </label>
-                    <input
-                      type="number"
-                      min={500}
-                      max={8000}
-                      value={baseSalary}
-                      onChange={(e) => setBaseSalary(Number(e.target.value))}
-                      disabled={simulationRunning}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                    />
-                  </div>
-                </div>
-
-                {/* Display PCR logic parameters */}
-                <div className="p-3 bg-slate-100/60 dark:bg-slate-950/65 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-[10px] space-y-1.5 text-slate-500">
-                  <div className="flex justify-between">
-                    <span>PCR Name:</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-300">ZW01 (Weekend OT)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Base Work Hours:</span>
-                    <span>160 Hours / Month</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Weekend Multiplier:</span>
-                    <span className="font-bold text-indigo-500">
-                      {empGrade === "Standard" ? "1.50x Rate" : "0.00x (Executive Cap)"}
-                    </span>
-                  </div>
+                    {t("الموافقة على الإجازة", "APPROVE REQUEST")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={simulationRunning}
+                    onClick={() => setManagerAction("reject")}
+                    className={`py-2 rounded-lg font-extrabold text-[11px] border transition-all cursor-pointer ${
+                      managerAction === "reject"
+                        ? "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-500/30"
+                        : "bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-600 border-slate-200 dark:border-slate-800"
+                    }`}
+                  >
+                    {t("رفض الطلب", "REJECT REQUEST")}
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Simulated Actions Trigger and Reset */}
             <div className="flex gap-2 pt-2">
@@ -530,10 +366,7 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
           {/* Stepper Progression Visual */}
           <div className="p-4 bg-white dark:bg-slate-950/40 border border-slate-150 dark:border-slate-850 rounded-xl space-y-4 flex-1 flex flex-col justify-between">
             <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              {activeTab === "leave"
-                ? t("مراحل سير عمل الإجازات", "Leaves Workflow")
-                : t("مراحل احتساب رواتب SAP", "SAP Payroll Progression")
-              }
+              {t("مراحل سير عمل الإجازات", "Leaves Workflow")}
             </h3>
 
             <div className="space-y-4 my-auto py-2">
