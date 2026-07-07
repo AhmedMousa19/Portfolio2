@@ -45,14 +45,11 @@ export default function App() {
           if (!parsed.messages || parsed.messages.length < 3 || !parsed.messages.some((m: any) => m.id === "msg-3")) {
             parsed.messages = initialDatabase.messages;
           }
-          // Force update the title to the clean professional specialization (SAP HCM Consultant | React Developer)
-          if (
-            !parsed.profile.titleEn ||
-            parsed.profile.titleEn === "SAP HCM Consultant & Web Developer" ||
-            parsed.profile.titleEn.includes("Builder") ||
-            !parsed.profile.titleEn.includes("React")
-          ) {
+          // Set fallback titles if not defined
+          if (!parsed.profile.titleEn) {
             parsed.profile.titleEn = "SAP HCM Consultant | React Developer";
+          }
+          if (!parsed.profile.titleAr) {
             parsed.profile.titleAr = "استشاري SAP HCM | مطور React";
           }
           if (!parsed.profile.linkedin) {
