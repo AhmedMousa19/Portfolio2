@@ -38,7 +38,7 @@ type SimulationStep = {
 };
 
 export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSimulatorProps) {
-  const [activeTab, setActiveTab] = useState<"leave" | "sap" | "salesbuzz">("leave");
+  const [activeTab, setActiveTab] = useState<"leave" | "sap">("leave");
   const [simulationRunning, setSimulationRunning] = useState(false);
   const [currentStepIdx, setCurrentStepIdx] = useState(-1);
   const [simLog, setSimLog] = useState<string[]>([]);
@@ -54,13 +54,6 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
   const [empGrade, setEmpGrade] = useState<"Standard" | "Senior">("Standard");
   const [weekendOvertimeHours, setWeekendOvertimeHours] = useState(6);
   const [baseSalary, setBaseSalary] = useState(1200);
-
-  // Tab 3 (Salesbuzz Sync) inputs
-  const [salesRep, setSalesRep] = useState("Sameh");
-  const [targetClient, setTargetClient] = useState("HyperOne Market");
-  const [orderedProduct, setOrderedProduct] = useState("Beverages Box");
-  const [orderedQty, setOrderedQty] = useState(15);
-  const [availableStock, setAvailableStock] = useState(100);
 
   const t = <T,>(ar: T, en: T): T => (lang === "ar" ? ar : en);
 
@@ -211,52 +204,8 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
     }
   ];
 
-  // Define Steps for Salesbuzz Gateway Sync
-  const salesbuzzSteps: SimulationStep[] = [
-    {
-      id: 1,
-      labelAr: "حفظ الطلب على جهاز المندوب المحمول",
-      labelEn: "Create Order on Handheld Device",
-      descAr: `يقوم المندوب (${salesRep}) بحفظ فاتورة جديدة للعميل (${targetClient}) تحتوي على المنتج (${t(orderedProduct === "Beverages Box" ? "صندوق مشروبات" : "علبة مياه معدنية", orderedProduct)}) بكمية ${orderedQty}.`,
-      descEn: `Sales rep (${salesRep}) logs a pending checkout for client (${targetClient}) requesting ${orderedQty} units of ${orderedProduct}.`,
-      status: "idle",
-      icon: <Smartphone className="w-4 h-4" />
-    },
-    {
-      id: 2,
-      labelAr: "إرسال طلب المزامنة (Synchronization Web Service)",
-      labelEn: "Trigger Sync Web Service Request",
-      descAr: "جهاز المندوب يرسل ملف XML المرمز عبر شبكة الاتصالات الآمنة للـ Admin Control Web Service.",
-      descEn: "Handheld initiates secure web synchronization request sending compressed XML packets to Server API.",
-      status: "idle",
-      icon: <Layers className="w-4 h-4 text-blue-500" />
-    },
-    {
-      id: 3,
-      labelAr: "التحقق الفوري من توافر المخزون",
-      labelEn: "Real-time Stock Availability Check",
-      descAr: `قاعدة بيانات الخادم تتحقق من الكمية المتوفرة حالياً (${availableStock} وحدات). النتيجة: كافي! جاري حجز الكمية.`,
-      descEn: `Server database queries stock quantities (${availableStock} units available). Result: Verification Success! Allocating units.`,
-      status: "idle",
-      icon: <Database className="w-4 h-4 text-teal-500" />
-    },
-    {
-      id: 4,
-      labelAr: "تحديث المخزون والاعتماد التلقائي",
-      labelEn: "Deduct Inventory & Lock Transaction",
-      descAr: `تنزيل المخزون المتوفر ليصبح ${availableStock - orderedQty} وحدة وتحديث لوحة تحكم الإدارة فورياً بالتقارير اللحظية لـ Sales KPIs.`,
-      descEn: `Inventory balance decremented to ${availableStock - orderedQty} units. Instant dashboard notification dispatched to Regional Manager.`,
-      status: "idle",
-      icon: <CheckCircle className="w-4 h-4 text-emerald-500" />
-    }
-  ];
-
   // Select steps based on active tab
-  const activeSteps = activeTab === "leave" 
-    ? leaveSteps 
-    : activeTab === "sap" 
-    ? sapSteps 
-    : salesbuzzSteps;
+  const activeSteps = activeTab === "leave" ? leaveSteps : sapSteps;
 
   // Run simulation timeline using timed intervals
   const handleStartSimulation = () => {
@@ -355,16 +304,6 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
           >
             {t("احتساب الرواتب SAP", "SAP HCM Payroll")}
           </button>
-          <button
-            onClick={() => setActiveTab("salesbuzz")}
-            className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-              activeTab === "salesbuzz"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm border border-slate-150 dark:border-slate-800"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-            }`}
-          >
-            {t("مزامنة Salesbuzz", "Salesbuzz Sync")}
-          </button>
         </div>
       </div>
 
@@ -377,9 +316,7 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
               <User className="w-3.5 h-3.5" />
               {activeTab === "leave" 
                 ? t("إعداد متغيرات طلب الإجازة", "Configure Leave Request")
-                : activeTab === "sap"
-                ? t("إعداد مدخلات احتساب الرواتب", "Configure Payroll Parameters")
-                : t("إعداد متغيرات مزامنة المبيعات", "Configure Sales Sync")
+                : t("إعداد مدخلات احتساب الرواتب", "Configure Payroll Parameters")
               }
             </h3>
 
@@ -559,91 +496,6 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
               </div>
             )}
 
-            {/* TAB 3: SALESBUZZ CONTROLS */}
-            {activeTab === "salesbuzz" && (
-              <div className="space-y-3.5 text-xs">
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Sales Rep */}
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-slate-400 font-bold">
-                      {t("اسم مندوب المبيعات", "Field Sales Representative")}
-                    </label>
-                    <input
-                      type="text"
-                      value={salesRep}
-                      onChange={(e) => setSalesRep(e.target.value)}
-                      disabled={simulationRunning}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                    />
-                  </div>
-
-                  {/* Customer */}
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-slate-400 font-bold">
-                      {t("العميل المستهدف", "Selected Client Store")}
-                    </label>
-                    <input
-                      type="text"
-                      value={targetClient}
-                      onChange={(e) => setTargetClient(e.target.value)}
-                      disabled={simulationRunning}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                    />
-                  </div>
-                </div>
-
-                {/* Ordered Product */}
-                <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-slate-400 font-bold">
-                    {t("المنتج المطلوب شحنه", "Product Segment")}
-                  </label>
-                  <select
-                    value={orderedProduct}
-                    onChange={(e) => setOrderedProduct(e.target.value as any)}
-                    disabled={simulationRunning}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                  >
-                    <option value="Beverages Box">{t("صناديق مشروبات غازية متنوعة", "FMCG Beverages Assorted Box")}</option>
-                    <option value="Water Case">{t("كرتون مياه معدنية طبيعية", "Premium Natural Spring Water Pack")}</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Ordered Qty */}
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-slate-400 font-bold">
-                      {t("الكمية المطلوبة (وحدة)", "Order Quantity")}
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={availableStock}
-                      value={orderedQty}
-                      onChange={(e) => setOrderedQty(Number(e.target.value))}
-                      disabled={simulationRunning}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                    />
-                  </div>
-
-                  {/* Available Stock */}
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-slate-400 font-bold">
-                      {t("الرصيد المتوفر بالمخزن", "Inventory On Hand")}
-                    </label>
-                    <input
-                      type="number"
-                      min={orderedQty}
-                      max={1000}
-                      value={availableStock}
-                      onChange={(e) => setAvailableStock(Number(e.target.value))}
-                      disabled={simulationRunning}
-                      className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Simulated Actions Trigger and Reset */}
             <div className="flex gap-2 pt-2">
               <button
@@ -680,9 +532,7 @@ export default function BusinessDemoSimulator({ lang, dbState }: BusinessDemoSim
             <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               {activeTab === "leave"
                 ? t("مراحل سير عمل الإجازات", "Leaves Workflow")
-                : activeTab === "sap"
-                ? t("مراحل احتساب رواتب SAP", "SAP Payroll Progression")
-                : t("مراحل مزامنة مبيعات Salesbuzz", "Salesbuzz Sync Progress")
+                : t("مراحل احتساب رواتب SAP", "SAP Payroll Progression")
               }
             </h3>
 
