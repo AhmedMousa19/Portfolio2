@@ -149,7 +149,9 @@ Guidelines:
   // AI Chatbot endpoint proxying Gemini
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, history } = req.body;
+      const message = req.body?.message;
+      const history = req.body?.history;
+
       if (!message) {
         return res.status(400).json({ error: "Message is required" });
       }
@@ -174,7 +176,7 @@ Guidelines:
       chatContents.push({ text: `User: ${message}` });
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-2.5-flash",
         contents: chatContents.map(c => c.text).join("\n\n"),
         config: {
           temperature: 0.7,
@@ -185,7 +187,8 @@ Guidelines:
     } catch (err: any) {
       console.error("Gemini server error, falling back to local simulation:", err);
       // Seamlessly fall back to the smart local simulator so the client NEVER sees a connection error
-      const reply = getSimulatedResponse(req.body.message || "");
+      const fallbackMsg = req.body?.message || "";
+      const reply = getSimulatedResponse(fallbackMsg);
       res.json({ text: reply });
     }
   });

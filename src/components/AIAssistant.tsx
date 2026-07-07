@@ -41,6 +41,47 @@ export default function AIAssistant({ lang, dbState, onLogAction }: AIAssistantP
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading, isOpen]);
 
+  const getClientSimulatedResponse = (message: string): string => {
+    const lowercaseMsg = message.toLowerCase();
+    const isArabic = /[\u0600-\u06FF]/.test(message);
+
+    if (isArabic) {
+      if (lowercaseMsg.includes("أتمتة") || lowercaseMsg.includes("اتمتة") || lowercaseMsg.includes("تلقائي") || lowercaseMsg.includes("سير العمل") || lowercaseMsg.includes("workflow") || lowercaseMsg.includes("automation")) {
+        return "نعم، المهندس أحمد موسى محترف في أتمتة العمليات وسير العمل (Workflow Automation)! لقد قام بابتكار نظام متطور لأتمتة طلبات الإجازات (Leave Management Workflow Automation) باستخدام Google Apps Script و Gmail API و Excel VBA، مما يسمح بإرسال إشعارات فورية بالبريد الإلكتروني وتحديث البيانات تلقائياً وحماية السجلات من التعديل العشوائي.";
+      }
+      if (lowercaseMsg.includes("مشروع") || lowercaseMsg.includes("مشاريع") || lowercaseMsg.includes("project")) {
+        return "أحمد قام بتطوير عدة مشاريع متميزة ورائعة، ومنها:\n\n1. **منصة Mainly Reports**: نظام متكامل لإدارة تقارير الموظفين والمديرين يدعم نظام الموافقات والتعليقات المباشرة مع لوحة إحصائيات بـ React و Firebase.\n2. **أتمتة طلبات الإجازات**: نظام مؤتمت بالكامل بـ Google Apps Script و VBA.\n3. **تطبيق نظام SAP HCM في كمارا**: حيث ساهم بتجهيز واختبار البيانات وتدريب المستخدمين.";
+      }
+      if (lowercaseMsg.includes("خبرة") || lowercaseMsg.includes("عمل") || lowercaseMsg.includes("ساب") || lowercaseMsg.includes("sap") || lowercaseMsg.includes("experience")) {
+        return "أحمد موسى يعمل كاستشاري SAP HCM في الشركة الاقتصادية منذ يوليو 2024. يمتلك خبرة عملية ممتازة في موديولات الرواتب (Payroll)، وإدارة الوقت (Time Management)، والتطوير التنظيمي (OM)، وشؤون الموظفين (PA). بالإضافة لحصوله على تدريب استشاري محترف مكثف لتهيئة وتطبيق النظام وفق متتبعات الشركات.";
+      }
+      if (lowercaseMsg.includes("مهارات") || lowercaseMsg.includes("برمج") || lowercaseMsg.includes("تقني") || lowercaseMsg.includes("skills")) {
+        return "يمتلك أحمد باقة مهارات مميزة تجمع بين الجانب الإداري والتقني:\n- **أنظمة SAP**: تهيئة وتطوير موديولات SAP HCM (PA, OM, TM, Payroll).\n- **تطوير الويب**: إتقان React و JavaScript و HTML5/CSS3 و Tailwind CSS لإنشاء واجهات ذكية وسلسة.\n- **الأتمتة**: أتمتة التقارير بـ Excel VBA وسير العمل بـ Google Apps Script.";
+      }
+      if (lowercaseMsg.includes("تواصل") || lowercaseMsg.includes("اتصال") || lowercaseMsg.includes("رقم") || lowercaseMsg.includes("ايميل") || lowercaseMsg.includes("contact") || lowercaseMsg.includes("email")) {
+        return "يسعد أحمد تواصلكم معه مباشرة! يمكنك استخدام نموذج الاتصال المتواجد بالموقع، أو مراسلته عبر البريد الإلكتروني: **ahmed.mousa4499@gmail.com** أو بالاتصال الهاتفي على الرقم: **+201018564287**.";
+      }
+      return "أهلاً بك! أنا المساعد الذكي للمهندس أحمد موسى. يسعدني إجابتك عن أي سؤال يخص خبراته المهنية في SAP HCM، أو مهاراته في تطوير الويب الحديث (React)، أو أتمتة العمليات وسير العمل (Workflow Automation). كيف يمكنني مساعدتك اليوم؟";
+    } else {
+      if (lowercaseMsg.includes("workflow") || lowercaseMsg.includes("automation") || lowercaseMsg.includes("automate")) {
+        return "Yes, Ahmed excels at Workflow and Process Automation! He created an automated Leave Management System using Google Apps Script, Gmail API, and Excel VBA. This system fully automates request approvals/rejections, sends real-time email notifications to managers and employees, and protects historical records from manual tampering.";
+      }
+      if (lowercaseMsg.includes("project") || lowercaseMsg.includes("projects")) {
+        return "Ahmed has successfully built and contributed to several outstanding projects:\n\n1. **Mainly Reports Platform** (Live at https://mainly-rep.vercel.app/): A robust report management dashboard for employees and managers featuring real-time comments, request approval workflows, and responsive visual charts.\n2. **Leave Management Workflow**: Fully automated workspace tools using Google Apps Script & VBA.\n3. **Kamara SAP HCM Implementation**: Handled configuration support, QA testing, and delivered user workshops.";
+      }
+      if (lowercaseMsg.includes("experience") || lowercaseMsg.includes("work") || lowercaseMsg.includes("job") || lowercaseMsg.includes("sap") || lowercaseMsg.includes("hcm")) {
+        return "Ahmed has been working as an SAP HCM Consultant at Economic Company since July 2024. He has strong expertise in configuring and supporting Payroll, Time Management (TM), Organizational Management (OM), and Personnel Administration (PA) modules, and is highly capable of bridging HR business requirements with optimal SAP solutions.";
+      }
+      if (lowercaseMsg.includes("skills") || lowercaseMsg.includes("skill") || lowercaseMsg.includes("code") || lowercaseMsg.includes("tech")) {
+        return "Ahmed's core skill set is highly versatile:\n- **SAP HCM**: Custom payroll configurations, time evaluations, and master data management.\n- **Frontend Development**: React.js, JavaScript (ES6+), Tailwind CSS, and HTML5/CSS3.\n- **Automation**: Google Apps Script, Excel VBA, and Gmail API integration.";
+      }
+      if (lowercaseMsg.includes("contact") || lowercaseMsg.includes("email") || lowercaseMsg.includes("phone") || lowercaseMsg.includes("hire") || lowercaseMsg.includes("reach")) {
+        return "You can easily contact Ahmed by filling out the Contact Form on this portfolio, or reach out directly via:\n- **Email**: ahmed.mousa4499@gmail.com\n- **Phone/WhatsApp**: +20 1018564287\n- **GitHub**: https://github.com/AhmedMousa19";
+      }
+      return "Hello! I am Ahmed Mousa's AI Assistant. I am happy to answer any questions about his background in SAP HCM Consulting, modern web development (React), or workflow automation. How can I help you today?";
+    }
+  };
+
   const handleSend = async (textToSend?: string) => {
     const text = (textToSend || input).trim();
     if (!text) return;
@@ -70,17 +111,9 @@ export default function AIAssistant({ lang, dbState, onLogAction }: AIAssistantP
       
       setMessages((prev) => [...prev, { role: "ai", content: data.text }]);
     } catch (error) {
-      console.error("Chat error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "ai",
-          content: t(
-            "عذراً، واجهت مشكلة في الاتصال بالخادم. يرجى المحاولة مرة أخرى.",
-            "Sorry, I encountered a connection issue. Please try again."
-          ),
-        },
-      ]);
+      console.error("Chat error, using local simulation fallback:", error);
+      const fallbackReply = getClientSimulatedResponse(text);
+      setMessages((prev) => [...prev, { role: "ai", content: fallbackReply }]);
     } finally {
       setIsLoading(false);
     }
@@ -267,10 +300,6 @@ export default function AIAssistant({ lang, dbState, onLogAction }: AIAssistantP
                 <Send className="w-4 h-4 transform rotate-180" />
               </button>
             </form>
-            <div className="mt-1.5 flex items-center justify-center gap-1 text-[10px] text-gray-400">
-              <Bot className="w-3 h-3" />
-              <span>{t("يعمل بواسطة نموذج الذكاء الاصطناعي Gemini 3.5", "Powered by Gemini 3.5 AI Model")}</span>
-            </div>
           </div>
         </div>
       )}
