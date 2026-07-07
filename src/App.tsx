@@ -30,6 +30,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { initialDatabase } from "./initialData";
 import { DatabaseState, Lang, Toast } from "./types";
 import ProjectCard from "./components/ProjectCard";
+import BusinessDemoSimulator from "./components/BusinessDemoSimulator";
 import ContactForm from "./components/ContactForm";
 import AIAssistant from "./components/AIAssistant";
 import AdminDashboard from "./components/AdminDashboard";
@@ -625,6 +626,11 @@ export default function App() {
               </div>
             </div>
             <ProjectCard lang={lang} dbState={dbState} onLogAction={logAction} />
+
+            {/* Interactive Business Case/Demo Simulator */}
+            <div className="pt-4">
+              <BusinessDemoSimulator lang={lang} dbState={dbState} />
+            </div>
           </motion.section>
 
           {/* SECTION: Timeline Experience */}
